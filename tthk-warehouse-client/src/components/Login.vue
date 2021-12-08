@@ -48,7 +48,7 @@ export default {
         password: password
       }).then(() => {
         this.loading = false;
-        this.$router.push('/')
+        this.$router.push('/store')
       }).catch(() => {
         this.loading = false
       })

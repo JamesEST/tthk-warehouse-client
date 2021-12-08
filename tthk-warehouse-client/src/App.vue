@@ -9,9 +9,14 @@
       <v-toolbar-title>WareHouse</v-toolbar-title>
 
       <v-spacer></v-spacer>
+      <span v-if="isLoggedIn">
 
-      <v-btn exact to="/register" elevation="0" icon><v-icon>mdi-account-plus</v-icon></v-btn>
-      <v-btn exact to="/login" elevation="0" icon><v-icon>login</v-icon></v-btn>
+      </span>
+      <span v-else>
+        <v-btn exact to="/register" elevation="0" icon><v-icon>mdi-account-plus</v-icon></v-btn>
+        <v-btn exact to="/login" elevation="0" icon><v-icon>login</v-icon></v-btn>
+      </span>
+
 
     </v-app-bar>
    </div>
@@ -19,6 +24,7 @@
     <v-main>
       <v-container fill-height>
         <router-view></router-view>
+        
       </v-container>
     </v-main>
   </v-app>
@@ -30,7 +36,10 @@ export default {
   name: 'App',
 
   components: {
-    
+    //
+  },
+  computed : {
+    isLoggedIn : function(){ return this.$store.getters.isAuthenticated}
   },
 
   data: () => ({

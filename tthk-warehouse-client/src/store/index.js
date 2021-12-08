@@ -1,6 +1,8 @@
 import Vue from 'vue'
-import axios from "axios";
 import Vuex from 'vuex'
+import axios from "axios";
+import auth from './modules/auth';
+import createPersistedState from "vuex-persistedstate";
 
 const state = () => ({
     accessToken: null,
@@ -18,19 +20,32 @@ const errors = {
 }
 
 const getters = {
-    alertNotification (state) {
-        return state.alertNotification
-    }
+    isAuthenticated: (state) => !!state.user,
+    StateUser: (state) => state.user,
 }
 
 const actions = {
     registerUser ({ commit }, payload) {
         return new Promise((resolve, reject) => {
-            axios.post('http://localhost:8080/register', {
+            axios.post('http://localhost:8080/users', {
                 'email': payload.email,
                 'password': payload.password,
-                'firstName': payload.firstName,
-                'lastName': payload.lastName
+                'first_name': payload.first_name,
+                'last_name': payload.last_name,
+                'address_id':{
+                    'address_line_1': payload.address_line_1,
+                    'address_line_2': payload.address_line_2,
+                    'city': payload.city,
+                    'postal_code': payload.postalCode,
+                    'country': payload.country,
+                    'telephone': payload.phone
+                },
+                'payment_id':{
+                    'payment_type': payload.paymentType,
+                    'card_number': payload.cardNumber,
+                    'expiry': payload.expiry
+                }
+                
             })
                 .then((response) => {
                     if (response.status === 200) {
@@ -63,19 +78,20 @@ const actions = {
                 'password': payload.password
             })
                 .then((response) => {
-                    if (response.data.success) {
+                    if (response.data) {
                         resolve(response.data)
-                        commit('setAccessToken', response.data.accessToken)
+                        console.log(response.data.ID)
+                        localStorage.setItem('token', response.data.ID)
                     } else if (response.status === 401) {
                         commit('createNewAlert', {
                             color: 'error',
-                            text: response.data.error
+                            text: response.data
                         })
                     }
                 }).catch((error) => {
                 commit('createNewAlert', {
                     color: 'error',
-                    text: error.response.data.error
+                    text: error.response.data
                 })
                 reject(error)
             })
@@ -92,21 +108,25 @@ const mutations = {
     setAlertStatus (state, payload) {
         state.alertNotification.status = payload
     },
-    setAccessToken (state, payload) {
-        state.accessToken = payload
-        localStorage.setItem('token', payload)
+
+    setUserData (state, payload) {
+        state.user = payload
     },
+
     deleteUserData (state) {
         state.user = null
-        state.accessToken = null
-        localStorage.removeItem('token')
-    },
-    setUser (state, payload) {
-        state.user = payload
     }
+    
 }
 Vue.use(Vuex)
 export default new Vuex.Store ({
+    modules: {
+        auth
+    },
+    plugins: [createPersistedState()],
+   
+
+
     state,
     errors,
     getters,
